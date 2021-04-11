@@ -30,6 +30,13 @@ struct MultiIterator
 
 		return false;
 	}
+
+	virtual void zero()
+	{
+		auto current = vcurrent.data();
+		for (int i = 0; i < size; i++)
+			current[i] = 0;
+	}
 };
 
 // A group of indexes that iterates only through indexes with total sum no greater than limit.
@@ -87,8 +94,8 @@ struct GenericMultiIterator
                 auto current = vcurrent.data();
                 for (int i = size - 1; i >= 0; i--)
                 {
-                        if (!current[i].increment())
-				current[i].zero();
+                        if (!current[i]->increment())
+				current[i]->zero();
                         else
                                 return true;
                 }
