@@ -15,7 +15,7 @@ struct MultiIterator
 
 	MultiIterator(const std::vector<uint32_t>& dims_, const std::vector<uint32_t>& current_) : vdims(dims_), vcurrent(current_), size(dims_.size()) { }
 
-	virtual bool increment()
+	virtual bool next()
 	{
 		const auto dims = vdims.data();
 		auto current = vcurrent.data();
@@ -52,7 +52,7 @@ struct LimitedMultiIterator : public MultiIterator
 	LimitedMultiIterator(const std::vector<uint32_t>& dims, const std::vector<uint32_t>& current, uint32_t& limit_) :
 		limit(limit_), MultiIterator(dims, current) { }
 
-        virtual bool increment()
+        virtual bool next()
         {
                 const auto dims = vdims.data();
                 auto current = vcurrent.data();
@@ -80,21 +80,17 @@ struct LimitedMultiIterator : public MultiIterator
 template<typename T>
 struct GenericMultiIterator
 {
-        const std::vector<T> vdims;
         std::vector<T> vcurrent;
         int size;
 
-        GenericMultiIterator(const std::vector<T>& dims_) : vdims(dims_), vcurrent(dims_.size()), size(dims_.size()) { }
+        GenericMultiIterator(const std::vector<T>& current_) : vcurrent(current_), size(current_.size()) { }
 
-        GenericMultiIterator(const std::vector<T>& dims_, const std::vector<T>& current_) : vdims(dims_), vcurrent(current_), size(dims_.size()) { }
-
-        virtual bool increment()
+        virtual bool next()
         {
-                const auto dims = vdims.data();
                 auto current = vcurrent.data();
                 for (int i = size - 1; i >= 0; i--)
                 {
-                        if (!current[i]->increment())
+                        if (!current[i]->next())
 				current[i]->zero();
                         else
                                 return true;
