@@ -36,10 +36,10 @@ struct ChoicesIterator
 		experiences(experiences_, period_lagged_experineces.getCurrent()[0]),
                 impl({ &period_lagged_experineces, &experiences })
 	{
-		auto current = period_lagged_experineces.getCurrent();
-		current[0] = n_periods;
+		auto dims = period_lagged_experineces.getDims();
+		dims[0] = n_periods;
 		for (int i = 1; i < n_choices + 1; i++)
-			current[i] = n_choices;
+			dims[i] = n_choices;
 	}
 
         // TODO Add a constructor with opaque ChoicesIteratorState, containing the current state.
@@ -47,6 +47,33 @@ struct ChoicesIterator
 
 int main(int argc, char* argv[])
 {
+	{
+		MultiIterator mi({ 4, 4, 4 });
+
+		int niters = 0;
+		do
+		{
+			niters++;
+		}
+		while(mi.next());
+
+		printf("MultiIterator mi({ 4, 4, 4 }) : %d iterations visited\n", niters);
+	}
+
+	{
+		uint32_t limit = 5;
+                LimitedMultiIterator mi({ 4, 4, 4 }, limit);
+
+                int niters = 0;
+                do
+                {
+                        niters++;
+                }
+                while(mi.next());
+
+                printf("LimitedMultiIterator mi({ 4, 4, 4 }, 5) : %d iterations visited\n", niters);
+        }
+
 	ChoicesIterator choices(76, {{ 31, 35, 10 }}, 1, 20);
 
 	int nchoices = 0;
