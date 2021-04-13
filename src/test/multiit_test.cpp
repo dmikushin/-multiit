@@ -1,5 +1,7 @@
 #include "multiit.h"
 
+#include <cstdio>
+
 // A group of indexes tailored to the choices matrix.
 struct ChoicesIterator
 {
@@ -32,13 +34,13 @@ struct ChoicesIterator
                 int n_lagged_experiences_, int n_choices) :
                 n_periods(n_periods_), n_experiences(experiences_.size()),
 		n_lagged_experiences(n_lagged_experiences_),
-		period_lagged_experineces(n_choices + 1),
+		period_lagged_experineces(n_lagged_experiences_ + 1),
 		experiences(experiences_, period_lagged_experineces.getCurrent()[0]),
                 impl({ &period_lagged_experineces, &experiences })
 	{
 		auto dims = period_lagged_experineces.getDims();
 		dims[0] = n_periods;
-		for (int i = 1; i < n_choices + 1; i++)
+		for (int i = 1; i < n_lagged_experiences + 1; i++)
 			dims[i] = n_choices;
 	}
 
@@ -83,7 +85,7 @@ int main(int argc, char* argv[])
 	}
 	while (choices.next());
 
-	printf("%d choices visited\n", nchoices);
+	printf("ChoicesIterator choices(76, {{ 31, 35, 10 }}, 1, 20) : %d choices visited\n", nchoices);
 
 	return 0;
 }

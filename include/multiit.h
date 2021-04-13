@@ -1,6 +1,7 @@
 #ifndef MULTIIT_H
 #define MULTIIT_H
 
+#include <cassert>
 #include <stdint.h>
 #include <vector>
 
@@ -66,23 +67,29 @@ struct LimitedMultiIterator : public MultiIterator
 {
 	const uint32_t& limit;
 
-	// Note limit is a reference, as we may want the limit to change dynamically.
-        LimitedMultiIterator(const std::vector<uint32_t>& dims, uint32_t& limit_) :
-		limit(limit_), MultiIterator(dims) { }
+	uint32_t sum;
 
 	// Note limit is a reference, as we may want the limit to change dynamically.
-	LimitedMultiIterator(const std::vector<uint32_t>& dims, const std::vector<uint32_t>& current, uint32_t& limit_) :
-		limit(limit_), MultiIterator(dims, current) { }
+        LimitedMultiIterator(const std::vector<uint32_t>& dims, uint32_t& limit_) :
+		limit(limit_), MultiIterator(dims), sum(0) { }
+
+	// Note limit is a reference, as we may want the limit to change dynamically.
+	LimitedMultiIterator(const std::vector<uint32_t>& dims, const std::vector<uint32_t>& current_, uint32_t& limit_) :
+		limit(limit_), MultiIterator(dims, current_)
+	{
+		auto current = getCurrent();
+		for (int i = 0; i < size; i++)
+			sum += current[i];
+	}
 
         virtual bool next()
         {
 		auto current = getCurrent();
                 const auto dims = getDims();
-		uint32_t sum = 0;
                 for (int i = size - 1; i >= 0; i--)
                 {
                         current[i]++;
-			sum += current[i];
+			sum++;
 
 			// Also check the sum is within the limit.
                         if ((current[i] >= dims[i]) || (sum > limit))
@@ -91,7 +98,15 @@ struct LimitedMultiIterator : public MultiIterator
                                 current[i] = 0;
 			}
                         else
+			{
+#ifndef NDEBUG
+				uint32_t sum_check = 0;
+				for (int j = 0; j < size; j++)
+					sum_check += current[j];
+				assert(sum == sum_check);
+#endif
                                 return true;
+			}
                 }
 
                 return false;
