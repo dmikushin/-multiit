@@ -10,16 +10,16 @@ struct ChoicesIterator
 
 	GenericMultiIterator<MultiIterator*> impl;
 
-        uint32_t getPeriod() const { return period_lagged_experineces.vcurrent[0]; }
+        uint32_t getPeriod() const { return period_lagged_experineces.getCurrent()[0]; }
 
         const uint32_t* getExperiences() const
 	{
-		return reinterpret_cast<const uint32_t*>(&period_lagged_experineces.vcurrent[1]);
+		return reinterpret_cast<const uint32_t*>(&period_lagged_experineces.getCurrent()[1]);
 	}
 
         const uint32_t* getLaggedExperiences() const
 	{
-		return reinterpret_cast<const uint32_t*>(&experiences.vcurrent[0]);
+		return reinterpret_cast<const uint32_t*>(experiences.getCurrent());
 	}
 
 	bool next()
@@ -32,10 +32,15 @@ struct ChoicesIterator
                 int n_lagged_experiences_, int n_choices) :
                 n_periods(n_periods_), n_experiences(experiences_.size()),
 		n_lagged_experiences(n_lagged_experiences_),
-		period_lagged_experineces(std::vector<uint32_t>(n_lagged_experiences_, n_choices)),
-		// TODO The period value is not yet in place.
-		experiences(experiences_, period_lagged_experineces.vcurrent[0]),
-                impl({ &period_lagged_experineces, &experiences }) { }
+		period_lagged_experineces(n_choices + 1),
+		experiences(experiences_, period_lagged_experineces.getCurrent()[0]),
+                impl({ &period_lagged_experineces, &experiences })
+	{
+		auto current = period_lagged_experineces.getCurrent();
+		current[0] = n_periods;
+		for (int i = 1; i < n_choices + 1; i++)
+			current[i] = n_choices;
+	}
 
         // TODO Add a constructor with opaque ChoicesIteratorState, containing the current state.
 };
