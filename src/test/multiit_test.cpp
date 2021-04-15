@@ -2,6 +2,8 @@
 
 #include <cstdio>
 
+using namespace multiit::runtime;
+
 // A group of indexes tailored to the choices matrix.
 struct ChoicesIterator
 {
@@ -50,7 +52,7 @@ struct ChoicesIterator
 int main(int argc, char* argv[])
 {
 	{
-		MultiIterator mi({ 4, 4, 4 });
+		MultiIterator mi({ 2, 3, 4 });
 
 		int niters = 0;
 		do
@@ -59,8 +61,21 @@ int main(int argc, char* argv[])
 		}
 		while(mi.next());
 
-		printf("MultiIterator mi({ 4, 4, 4 }) : %d iterations visited\n", niters);
+		printf("MultiIterator mi({ 2, 3, 4 }) : %d iterations visited\n", niters);
 	}
+
+        {
+		multiit::compiletime::MultiIterator<2, 3, 4> mi;
+
+                int niters = 0;
+                do
+                {
+                        niters++;
+                }
+                while(mi.next());
+
+                printf("multiit::compiletime::MultiIterator<2, 3, 4> mi : %d iterations visited\n", niters);
+        }
 
 	{
 		uint32_t limit = 5;

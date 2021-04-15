@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+using namespace multiit::runtime;
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(glaphyra, glaphyra)

@@ -20,10 +20,11 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(${PROJECT_NAME}_test "src/test/${PROJECT_NAME}_test.cpp")
-set_property(TARGET ${PROJECT_NAME}_test PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${PROJECT_NAME}_test PROPERTY CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 pybind11_add_module(${PROJECT_NAME}_python src/python/${PROJECT_NAME}_python.cpp)
+set_property(TARGET ${PROJECT_NAME}_python PROPERTY CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}_python PRIVATE ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}_python PROPERTIES LIBRARY_OUTPUT_NAME "${PROJECT_NAME}")
 
