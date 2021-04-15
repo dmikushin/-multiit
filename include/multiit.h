@@ -52,7 +52,7 @@ struct MultiIterator : public std::vector<uint32_t>
 		return false;
 	}
 
-	virtual void zero()
+	virtual void reset()
 	{
 		auto current = getCurrent();
 		for (int i = 0; i < size; i++)
@@ -127,7 +127,7 @@ struct GenericMultiIterator : private std::vector<T>
                 for (int i = size - 1; i >= 0; i--)
                 {
                         if (!current[i]->next())
-				current[i]->zero();
+				current[i]->reset();
                         else
                                 return true;
                 }
