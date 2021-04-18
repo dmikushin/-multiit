@@ -93,19 +93,48 @@ int main(int argc, char* argv[])
 		printf("multiit::compiletime::MultiIterator<2, 3, 4> mi : %d iterations visited\n", niters);
 	}
 
-	{
+        {
 		uint32_t limit = 5;
-		LimitedMultiIterator mi({ 4, 4, 4 }, limit);
+                multiit::runtime::LimitedMultiIterator mi_runtime({ 3, 4, 5 }, limit);
+                multiit::compiletime::LimitedMultiIterator<3, 4, 5> mi_compiletime(limit);
 
-		int niters = 0;
-		do
-		{
-			niters++;
-		}
-		while(mi.next());
+                if (mi_runtime.getSize() != mi_compiletime.getSize())
+                {
+                        fprintf(stderr, "Runtime and compile-time multi iterators indexes sizes mismatch: %zu != %zu\n",
+                                mi_runtime.getSize(), mi_compiletime.getSize());
+                        exit(-1);
+                }
 
-		printf("LimitedMultiIterator mi({ 4, 4, 4 }, 5) : %d iterations visited\n", niters);
-	}
+                int niters = 0;
+                while (1)
+                {
+                        niters++;
+
+                        bool next = mi_runtime.next();
+                        if (next != mi_compiletime.next())
+                        {
+                                fprintf(stderr, "Runtime and compile-time multi iterators volumes mismatch\n");
+                                exit(-1);
+                        }
+
+                        if (!next) break;
+
+                        const auto& current_runtime = mi_runtime.getCurrent();
+                        const auto& current_compiletime = mi_compiletime.getCurrent();
+                        for (int i = 0, size = mi_runtime.getSize(); i < size; i++)
+                        {
+                                if (current_runtime[i] != current_compiletime[i])
+                                {
+                                        fprintf(stderr, "Runtime and compile-time multi iterators current indexes mismatch @ i = %d: %u != %u\n",
+                                                i, current_runtime[i], current_compiletime[i]);
+                                        exit(-1);
+                                }
+                        }
+                }
+
+                printf("multiit::runtime::LimitedMultiIterator<3, 4, 5(5)> mi : %d iterations visited\n", niters);
+                printf("multiit::compiletime::LimitedMultiIterator<3, 4, 5>(5) mi : %d iterations visited\n", niters);
+        }
 
 	ChoicesIterator choices(76, {{ 31, 35, 10 }}, 1, 20);
 
