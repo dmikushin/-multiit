@@ -2,6 +2,7 @@
 #define MULTIIT_COMPILETIME_H
 
 #include <array>
+#include <cstring>
 #include <stdint.h>
 
 namespace multiit {
@@ -49,7 +50,7 @@ struct MultiIterator
 
 	virtual void reset()
 	{
-		memset(&current[0], 0, sizeof...(Dims));
+		memset(&current[0], 0, sizeof(current));
 	}
 
 	virtual ~MultiIterator() { }
