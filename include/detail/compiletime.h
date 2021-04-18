@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdint.h>
+#include <tuple>
 
 namespace multiit {
 
@@ -16,10 +17,7 @@ struct MultiIterator
 {
 	std::array<uint32_t, sizeof...(Dims)> current;
 
-	inline size_t getSize() const { return sizeof...(Dims); }
-
-	inline uint32_t* getCurrent() { return &current[0]; }
-	inline const uint32_t* getCurrent() const { return &current[0]; }
+	inline size_t size() const { return sizeof...(Dims); }
 
 	MultiIterator() { reset(); }
 
@@ -69,10 +67,10 @@ struct LimitedMultiIterator : public MultiIterator<Dims...>
 		limit(limit_), MultiIterator<Dims...>(), sum(0) { }
 
 	// Note limit is a reference, as we may want the limit to change dynamically.
-	LimitedMultiIterator(const std::vector<uint32_t>& current_, uint32_t& limit_) :
+	LimitedMultiIterator(const std::array<uint32_t, sizeof...(Dims)>& current_, uint32_t& limit_) :
 		limit(limit_), MultiIterator<Dims...>(current_)
 	{
-		for (int i = 0, e = MultiIterator<Dims...>::getSize(); i < e; i++)
+		for (int i = 0, e = MultiIterator<Dims...>::size(); i < e; i++)
 			sum += MultiIterator<Dims...>::current[i];
 	}
 
@@ -98,7 +96,7 @@ struct LimitedMultiIterator : public MultiIterator<Dims...>
 		{
 #ifndef NDEBUG
                         uint32_t sum_check = 0;
-                        for (int j = 0, e = MultiIterator<Dims...>::getSize(); j < e; j++)
+                        for (int j = 0, e = MultiIterator<Dims...>::size(); j < e; j++)
                                 sum_check += MultiIterator<Dims...>::current[j];
                         assert(sum == sum_check);
 #endif
@@ -112,6 +110,53 @@ struct LimitedMultiIterator : public MultiIterator<Dims...>
         {
                 return next<0, Dims...>();
         }
+};
+
+// A group of indexes, whose indexes are themselves groups of indexes.
+template <typename... Dims>
+struct GenericMultiIterator
+{
+	std::tuple<Dims...> current;
+
+        inline size_t size() const { return sizeof...(Dims); }
+
+	// TODO Neither of these two constructors can follow the limit reference!
+
+	GenericMultiIterator() { reset(); }
+
+        GenericMultiIterator(Dims&&... current_) : current(current_ ...) { }
+
+	template <int i>
+        constexpr bool next()
+        {
+                return false;
+        }
+
+        template <int i, typename Dim, typename... Rest>
+        bool next()
+        {
+		auto& current_i = std::get<i>(current) << " ";
+		if (!current_i->next())
+			current_i->reset();
+		else
+			return true;
+
+		return next<i + 1, Rest...>();
+        }
+
+	virtual bool next()
+        {
+                return next<0, Dims...>();
+        }
+
+	virtual void reset()
+	{
+		std::apply([](auto&&... current_i)
+                {
+                        ((current_i->reset()), ...);
+                },
+                current);
+	}
 };
 
 } // namespace compiletime

@@ -55,10 +55,10 @@ int main(int argc, char* argv[])
 		multiit::runtime::MultiIterator mi_runtime({ 2, 3, 4 });
 		multiit::compiletime::MultiIterator<2, 3, 4> mi_compiletime;
 
-		if (mi_runtime.getSize() != mi_compiletime.getSize())
+		if (mi_runtime.getSize() != mi_compiletime.size())
 		{
 			fprintf(stderr, "Runtime and compile-time multi iterators indexes sizes mismatch: %zu != %zu\n",
-				mi_runtime.getSize(), mi_compiletime.getSize());
+				mi_runtime.getSize(), mi_compiletime.size());
 			exit(-1);
 		}
 
@@ -77,13 +77,12 @@ int main(int argc, char* argv[])
 			if (!next) break;
 
 			const auto& current_runtime = mi_runtime.getCurrent();
-			const auto& current_compiletime = mi_compiletime.getCurrent();
 			for (int i = 0, size = mi_runtime.getSize(); i < size; i++)
 			{
-				if (current_runtime[i] != current_compiletime[i])
+				if (current_runtime[i] != mi_compiletime.current[i])
 				{
 					fprintf(stderr, "Runtime and compile-time multi iterators current indexes mismatch @ i = %d: %u != %u\n",
-						i, current_runtime[i], current_compiletime[i]);
+						i, current_runtime[i], mi_compiletime.current[i]);
 					exit(-1);
 				}
 			}
@@ -98,10 +97,10 @@ int main(int argc, char* argv[])
                 multiit::runtime::LimitedMultiIterator mi_runtime({ 3, 4, 5 }, limit);
                 multiit::compiletime::LimitedMultiIterator<3, 4, 5> mi_compiletime(limit);
 
-                if (mi_runtime.getSize() != mi_compiletime.getSize())
+                if (mi_runtime.getSize() != mi_compiletime.size())
                 {
                         fprintf(stderr, "Runtime and compile-time multi iterators indexes sizes mismatch: %zu != %zu\n",
-                                mi_runtime.getSize(), mi_compiletime.getSize());
+                                mi_runtime.getSize(), mi_compiletime.size());
                         exit(-1);
                 }
 
@@ -120,13 +119,12 @@ int main(int argc, char* argv[])
                         if (!next) break;
 
                         const auto& current_runtime = mi_runtime.getCurrent();
-                        const auto& current_compiletime = mi_compiletime.getCurrent();
                         for (int i = 0, size = mi_runtime.getSize(); i < size; i++)
                         {
-                                if (current_runtime[i] != current_compiletime[i])
+                                if (current_runtime[i] != mi_compiletime.current[i])
                                 {
                                         fprintf(stderr, "Runtime and compile-time multi iterators current indexes mismatch @ i = %d: %u != %u\n",
-                                                i, current_runtime[i], current_compiletime[i]);
+                                                i, current_runtime[i], mi_compiletime.current[i]);
                                         exit(-1);
                                 }
                         }
