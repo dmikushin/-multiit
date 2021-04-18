@@ -12,7 +12,9 @@ namespace runtime {
 // A group of indexes that iterate from 0 to the given upper value.
 struct MultiIterator : public std::vector<uint32_t>
 {
-	int size;
+	size_t size;
+
+	inline size_t getSize() const { return size; }
 
 	inline uint32_t* getCurrent() { return std::vector<uint32_t>::data(); }
 	inline const uint32_t* getCurrent() const { return std::vector<uint32_t>::data(); }
@@ -20,7 +22,7 @@ struct MultiIterator : public std::vector<uint32_t>
         inline uint32_t* getDims() { return std::vector<uint32_t>::data() + size; }
 	inline const uint32_t* getDims() const { return std::vector<uint32_t>::data() + size; }
 
-	MultiIterator(int size_) : std::vector<uint32_t>(2 * size_), size(size_) { }
+	MultiIterator(size_t size_) : std::vector<uint32_t>(2 * size_), size(size_) { }
 
 	MultiIterator(const std::vector<uint32_t>& dims_) : std::vector<uint32_t>(2 * dims_.size()), size(dims_.size())
 	{
@@ -44,7 +46,7 @@ struct MultiIterator : public std::vector<uint32_t>
 	{
 		auto current = getCurrent();
 		const auto dims = getDims();
-		for (int i = size - 1; i >= 0; i--)
+		for (int i = 0; i < size; i++)
 		{
 			current[i]++;
 			if (current[i] >= dims[i])
@@ -90,7 +92,7 @@ struct LimitedMultiIterator : public MultiIterator
         {
 		auto current = getCurrent();
                 const auto dims = getDims();
-                for (int i = size - 1; i >= 0; i--)
+                for (int i = 0; i < size; i++)
                 {
                         current[i]++;
 			sum++;
@@ -128,7 +130,7 @@ struct GenericMultiIterator : private std::vector<T>
         virtual bool next()
         {
                 auto current = std::vector<T>::data();
-                for (int i = size - 1; i >= 0; i--)
+                for (int i = 0; i < size; i++)
                 {
                         if (!current[i]->next())
 				current[i]->reset();

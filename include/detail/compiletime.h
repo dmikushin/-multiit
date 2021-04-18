@@ -15,15 +15,23 @@ struct MultiIterator
 {
 	std::array<uint32_t, sizeof...(Dims)> current;
 
+	inline size_t getSize() const { return sizeof...(Dims); }
+
 	inline uint32_t* getCurrent() { return &current[0]; }
 	inline const uint32_t* getCurrent() const { return &current[0]; }
 
-	MultiIterator() { }
+	MultiIterator() { reset(); }
 
 	MultiIterator(const std::array<uint32_t, sizeof...(Dims)>& current_) : current(current_) { }
 
+	template <int i>
+	constexpr bool next()
+	{
+		return false;
+	}
+
 	template <int i, uint32_t Dim, uint32_t... Rest>
-	inline bool next()
+	bool next()
 	{
 		current[i]++;
 		if (current[i] >= Dim)
@@ -31,10 +39,7 @@ struct MultiIterator
 		else
 			return true;
 
-		if constexpr(sizeof...(Rest) > 0)
-			return next<i + 1, Rest...>();
-
-		return false;
+		return next<i + 1, Rest...>();
 	}
 
 	virtual bool next()
