@@ -2,17 +2,15 @@
 
 #include <cstdio>
 
-using namespace multiit::runtime;
-
 // A group of indexes tailored to the choices matrix.
 struct ChoicesIterator
 {
 	const int n_periods, n_experiences, n_lagged_experiences;
 
-	MultiIterator period_lagged_experineces;
-	LimitedMultiIterator experiences;
+	multiit::runtime::MultiIterator period_lagged_experineces;
+	multiit::runtime::LimitedMultiIterator experiences;
 
-	GenericMultiIterator<MultiIterator*> impl;
+	multiit::runtime::GenericMultiIterator<multiit::runtime::MultiIterator*> impl;
 
 	uint32_t getPeriod() const { return period_lagged_experineces.getCurrent()[0]; }
 
@@ -52,6 +50,7 @@ struct ChoicesIterator
 int main(int argc, char* argv[])
 {
 	{
+		// Construct a simple multiiterator and compare results.
 		multiit::runtime::MultiIterator mi_runtime({ 2, 3, 4 });
 		multiit::compiletime::MultiIterator<2, 3, 4> mi_compiletime;
 
@@ -93,6 +92,7 @@ int main(int argc, char* argv[])
 	}
 
         {
+		// Construct a limited multiiterator and compare results.
 		uint32_t limit = 5;
                 multiit::runtime::LimitedMultiIterator mi_runtime({ 3, 4, 5 }, limit);
                 multiit::compiletime::LimitedMultiIterator<3, 4, 5> mi_compiletime(limit);
@@ -133,6 +133,56 @@ int main(int argc, char* argv[])
                 printf("multiit::runtime::LimitedMultiIterator<3, 4, 5(5)> mi : %d iterations visited\n", niters);
                 printf("multiit::compiletime::LimitedMultiIterator<3, 4, 5>(5) mi : %d iterations visited\n", niters);
         }
+
+	{
+		// Construct a simple multiiterator.
+		multiit::runtime::MultiIterator mi_runtime1({ 2, 3, 4 });
+                multiit::compiletime::MultiIterator<2, 3, 4> mi_compiletime1;
+
+		// Construct a limited multiiterator,
+		multiit::runtime::LimitedMultiIterator mi_runtime2({ 3, 4, 5 }, mi_runtime1[0]);
+                multiit::compiletime::LimitedMultiIterator<3, 4, 5> mi_compiletime2(mi_compiletime1.current[0]);
+
+		// Construct an iterator combining the two iterators above and compare results.
+		multiit::runtime::GenericMultiIterator<multiit::runtime::MultiIterator*> gmi_runtime({ &mi_runtime1, &mi_runtime2 });
+		multiit::compiletime::GenericMultiIterator gmi_compiletime(mi_compiletime1, mi_compiletime2);
+
+		if (gmi_runtime.getSize() != gmi_compiletime.size())
+                {
+                        fprintf(stderr, "Runtime and compile-time multi iterators indexes sizes mismatch: %zu != %zu\n",
+                                gmi_runtime.getSize(), gmi_compiletime.size());
+                        exit(-1);
+                }
+
+		int niters = 0;
+                while (1)
+                {
+                        niters++;
+
+                        bool next = gmi_runtime.next();
+                        if (next != gmi_compiletime.next())
+                        {
+                                fprintf(stderr, "Runtime and compile-time multi iterators volumes mismatch\n");
+                                exit(-1);
+                        }
+
+                        if (!next) break;
+#if 0
+                        const auto& current_runtime = gmi_runtime.getCurrent();
+                        for (int i = 0, size = gmi_runtime.getSize(); i < size; i++)
+                        {
+                                if (current_runtime[i] != std::get<i>(gmi_compiletime.current).current)
+                                {
+                                        fprintf(stderr, "Runtime and compile-time multi iterators current indexes mismatch @ i = %d\n", i);
+                                        exit(-1);
+                                }
+                        }
+#endif
+		}
+
+                printf("multiit::runtime::GenericMultiIterator gmi : %d iterations visited\n", niters);
+                printf("multiit::compiletime::GenericMultiIterator gmi : %d iterations visited\n", niters);
+	}
 
 	ChoicesIterator choices(76, {{ 31, 35, 10 }}, 1, 20);
 

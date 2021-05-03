@@ -116,15 +116,13 @@ struct LimitedMultiIterator : public MultiIterator<Dims...>
 template <typename... Dims>
 struct GenericMultiIterator
 {
-	std::tuple<Dims...> current;
+	std::tuple<Dims&...> current;
 
         inline size_t size() const { return sizeof...(Dims); }
 
-	// TODO Neither of these two constructors can follow the limit reference!
-
 	GenericMultiIterator() { reset(); }
 
-        GenericMultiIterator(Dims&&... current_) : current(current_ ...) { }
+        GenericMultiIterator(Dims&... current_) : current(current_ ...) { }
 
 	template <int i>
         constexpr bool next()
@@ -135,9 +133,9 @@ struct GenericMultiIterator
         template <int i, typename Dim, typename... Rest>
         bool next()
         {
-		auto& current_i = std::get<i>(current) << " ";
-		if (!current_i->next())
-			current_i->reset();
+		auto& current_i = std::get<i>(current);
+		if (!current_i.next())
+			current_i.reset();
 		else
 			return true;
 
@@ -153,7 +151,7 @@ struct GenericMultiIterator
 	{
 		std::apply([](auto&&... current_i)
                 {
-                        ((current_i->reset()), ...);
+                        ((current_i.reset()), ...);
                 },
                 current);
 	}

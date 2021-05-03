@@ -125,6 +125,11 @@ struct GenericMultiIterator : private std::vector<T>
 {
         int size;
 
+	inline size_t getSize() const { return size; }
+
+	inline T* getCurrent() { return std::vector<T>::data(); }
+        inline const T* getCurrent() const { return std::vector<T>::data(); }
+
         GenericMultiIterator(const std::vector<T>& current_) : std::vector<T>(current_), size(current_.size()) { }
 
         virtual bool next()
