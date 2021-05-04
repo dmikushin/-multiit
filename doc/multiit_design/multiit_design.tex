@@ -49,7 +49,23 @@
 
 \begin{frame}[fragile]{Multi-Iterator: motivation}
 
-TODO Trend link video by Hal Finkel
+Three horrible ways to implement a multi-iterator:
+
+\begin{itemize}
+\item Store a matrix of all combinations in RAM (slow, only small problems could fit in)
+\item Generate combinations recursively (non-parallel)
+\item Implement bounds check with \texttt{if..else} (pipeline stalls)
+\end{itemize}
+
+\vskip10pt
+
+Three optimization ideas for high-performance multi-iterator:
+
+\begin{itemize}
+\item On-the-fly generation (and use) of combinations (no memory penalty)
+\item Use JIT-compliation (trending in modern HPC, see \href{https://www.youtube.com/watch?v=6dv9vdGIaWs&ab_channel=CppCon}{ClangJIT talk by Hal Finkel})
+\item Use predicates (bitmasks) instead of branching
+\end{itemize}
 
 \end{frame}
 
@@ -57,27 +73,67 @@ TODO Trend link video by Hal Finkel
 
 \begin{frame}[fragile]{Simple example}
 
+\begin{minipage}{9cm}
 \begin{lstlisting}[basicstyle=\tiny\ttfamily, language=c++]
 #include <multiit/multiit.h>
 
-multiit::runtime::MultiIterator mi({ 2, 3, 4 });
-// OR: multiit::compiletime::MultiIterator<2, 3, 4> mi;
+int main(int argc, char* argv[])
+{
+    multiit::runtime::MultiIterator mi({ 2, 3, 4 }); 
+    // OR: multiit::compiletime::MultiIterator<2, 3, 4> mi; 
 
-int niters = 0; 
-while (1)       
-{               
-    niters++;           
-                        
-    bool next = mi.next();
-    if (!next) break;   
-                        
-    const auto& current = mi.getCurrent();
-                        
-    // TODO Use the current combination of choices in a target app.
-}               
+    int niters = 0;
+    const int size = mi.getSize();
+    while (1) 
+    {   
+        niters++;
+        if (!mi.next()) break;
 
-printf("%d iterations visited\n", niters);
+        // TODO Use the current combination of choices in a target app.
+        const auto& current = mi.getCurrent();
+        for (int i = 0; i < size; i++)
+            printf("%d ", current[i]);
+        printf("\n");
+    }   
+
+    printf("%d iterations visited\n", niters);
+
+    return 0;
+}
 \end{lstlisting}
+\end{minipage}%
+\begin{minipage}{0.5cm}
+\hskip0.5cm
+\end{minipage}%
+\begin{minipage}{5cm}
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+./multiit_example                     
+1 0 0 
+0 1 0 
+1 1 0 
+0 2 0 
+1 2 0 
+0 0 1 
+1 0 1 
+0 1 1 
+1 1 1 
+0 2 1 
+1 2 1 
+0 0 2 
+1 0 2 
+0 1 2 
+1 1 2 
+0 2 2 
+1 2 2 
+0 0 3 
+1 0 3 
+0 1 3 
+1 1 3 
+0 2 3 
+1 2 3 
+24 iterations visited
+\end{lstlisting}
+\end{minipage}
 
 \end{frame}
 

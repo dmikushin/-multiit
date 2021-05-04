@@ -23,6 +23,10 @@ add_executable(${PROJECT_NAME}_test "src/test/${PROJECT_NAME}_test.cpp")
 set_property(TARGET ${PROJECT_NAME}_test PROPERTY CXX_STANDARD 17)
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
+add_executable(${PROJECT_NAME}_example "src/example/${PROJECT_NAME}_example.cpp")
+set_property(TARGET ${PROJECT_NAME}_example PROPERTY CXX_STANDARD 17)
+target_link_libraries(${PROJECT_NAME}_example ${PROJECT_NAME})
+
 #pybind11_add_module(${PROJECT_NAME}_python src/python/${PROJECT_NAME}_python.cpp)
 #set_property(TARGET ${PROJECT_NAME}_python PROPERTY CXX_STANDARD 17)
 #target_link_libraries(${PROJECT_NAME}_python PRIVATE ${PROJECT_NAME})
