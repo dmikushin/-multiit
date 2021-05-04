@@ -1,0 +1,195 @@
+% Dmitry Mikushin, UNIL, dmitry@parallel-computing.pro
+
+\DeclareOptionBeamer{compress}{\beamer@compresstrue}
+\ProcessOptionsBeamer
+
+\mode<presentation>
+
+\RequirePackage{tikz}
+\RequirePackage{lmodern}
+\RequirePackage{listingsutf8}
+\RequirePackage{xcolor}
+\def\newXeTeXintercharclass#1{} %hack to fool polyglossia
+\RequirePackage{polyglossia}
+\RequirePackage{fontspec}
+
+\setbeamerfont{block title}{size={}}
+\setbeamerfont{date}{size=\scriptsize}
+
+\definecolor{unil@black}{RGB}{35, 31, 32}
+\definecolor{unil@blue}{RGB}{0,140,204}
+\definecolor{unil@gray}{RGB}{230,230,230}
+\definecolor{unil@cyan}{RGB}{202,233,249}
+\definecolor{unil@lightblue}{RGB}{131,198,237}
+\definecolor{darkgreen}{RGB}{25,136,25}
+\definecolor{darkyellow}{RGB}{220,207,0}
+
+\hypersetup{colorlinks=true,linkcolor=unil@blue,urlcolor=unil@blue}
+
+\defaultfontfeatures{Scale=MatchLowercase, Mapping=tex-text}
+
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{shadows}
+
+\setsansfont{PT Sans}
+\setmonofont{PT Mono}
+
+\lstset{
+    inputencoding=utf8,
+%    backgroundcolor=\color{white},
+    tabsize=4,
+    rulecolor=,
+    upquote=true,
+%    aboveskip={1.5\baselineskip},
+    columns=fixed,
+    showstringspaces=false,
+    extendedchars=true,
+    breaklines=true,
+%    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=single,
+    showtabs=false,
+    showspaces=false,
+    showstringspaces=false,
+    basicstyle=\scriptsize\ttfamily,
+    identifierstyle=\ttfamily,
+    keywordstyle=\ttfamily\color[rgb]{0,0,1},
+    commentstyle=\ttfamily\color[rgb]{0.133,0.545,0.133},
+    stringstyle=\ttfamily\color[rgb]{0.627,0.126,0.941},
+}
+
+\lstdefinelanguage{cuda}{
+    language=C++,
+    keywords=[2]{__global__, __shared__, __syncthreads},
+    keywordstyle={[2]\ttfamily\bfseries\color{darkgreen}},
+}
+
+\makeatletter
+\newenvironment{btHighlight}[1][]
+{\begingroup\tikzset{bt@Highlight@par/.style={#1}}\begin{lrbox}{\@tempboxa}}
+{\end{lrbox}\bt@HL@box[bt@Highlight@par]{\@tempboxa}\endgroup}
+
+\newcommand\btHL[1][]{%
+  \begin{btHighlight}[#1]\bgroup\aftergroup\bt@HL@endenv%
+}
+\def\bt@HL@endenv{%
+  \end{btHighlight}%   
+  \egroup
+}
+\newcommand{\bt@HL@box}[2][]{%
+  \tikz[#1]{%
+    \pgfpathrectangle{\pgfpoint{1pt}{0pt}}{\pgfpoint{\wd #2}{\ht #2}}%
+    \pgfusepath{use as bounding box}%
+    \node[anchor=base west, fill=unil@lightblue,outer sep=0pt,inner xsep=1pt, inner ysep=0pt, rounded corners=3pt, minimum height=\ht\strutbox+1pt,#1]{\raisebox{1pt}{\strut}\strut\usebox{#2}};
+  }%
+}
+\makeatother
+
+\lstdefinestyle{markable}{
+    % Ugly hardcoded font size here!
+    % Otherwise, highlighted and plain are not the same!
+    basicstyle=\footnotesize\ttfamily,
+    moredelim=**[is][\btHL]{`}{`},
+}
+
+\setbeamertemplate{sidebar right}{}
+
+\setlength{\fboxsep}{0pt}
+
+\setbeamertemplate{title page}
+{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node [xshift=0cm,yshift=0cm] at (current page.center)
+    {\includegraphics[width=\paperwidth,height=\paperheight]{figures/template_title}};
+  \end{tikzpicture}% 
+  \begin{centering}
+    \begin{minipage}{1cm}
+    \hskip1cm
+    \end{minipage}%
+    \begin{minipage}{12cm}
+    \vskip8mm\begin{beamercolorbox}[sep=16pt,left]{title}
+      \usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par%
+      \ifx\insertsubtitle\@empty%
+      \else%
+        \vskip0.25em%
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+      \fi%     
+    \end{beamercolorbox}
+    \par\vskip-1mm
+    \begin{beamercolorbox}[sep=16pt,left]{author}
+      \usebeamerfont{author}\insertauthor
+    \end{beamercolorbox}
+    \vskip-8mm
+    \begin{beamercolorbox}[sep=16pt,left]{institute}
+      \usebeamerfont{institute}\insertinstitute
+    \end{beamercolorbox}
+    \vskip-10mm\begin{beamercolorbox}[sep=16pt,left]{date}
+      \usebeamerfont{date}\insertdate
+    \end{beamercolorbox}\vskip-8pt\vskip0.5em
+    {\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\par}
+    \vskip-8.1em\vskip-16pt\begin{beamercolorbox}[sep=16pt,right]{author}
+      \scriptsize\em %Acknowledgements (edit style file to change)
+    \end{beamercolorbox}\vskip-16pt
+    \end{minipage}
+  \end{centering}
+  \vfill 
+}
+
+\setbeamertemplate{frametitle}
+{%
+%  \leavevmode%
+  \vskip-5pt
+  \hbox{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3ex,dp=1.2ex,left,leftskip=10pt]{frametitle}%
+    \insertframetitle
+  \end{beamercolorbox}}%
+%  \begin{tikzpicture}[remember picture,overlay] 
+%    \node[inner sep=5pt,outer sep=0pt] at (current page.north west) [anchor=north west]
+%    {\includegraphics[height=1.4cm,keepaspectratio]{figures/apc_logo}};    
+%    \node[inner sep=20pt,outer sep=0pt,xshift=1cm,yshift=0.1cm] at (current page.north west) [anchor=north west]
+%    {\insertframetitle\strut\par};                  
+%  \end{tikzpicture}%
+}
+
+\useoutertheme{infolines}
+%\useoutertheme{split}
+\useinnertheme{rectangles}
+\setbeamertemplate{headline}{} % removes the headline that infolines inserts
+
+\usecolortheme{whale}
+%\usecolortheme{orchid}
+
+\setbeamercolor{author in head/foot}{bg=unil@black,fg=white}
+\setbeamercolor{title in head/foot}{bg=unil@blue,fg=unil@black}
+\setbeamercolor{date in head/foot}{bg=unil@blue,fg=white}
+\setbeamercolor{title}{bg={},fg=unil@black}
+\setbeamercolor{subtitle}{bg={},fg=unil@blue}
+\setbeamercolor{institute}{fg=unil@black}
+\setbeamercolor{frametitle}{bg=unil@blue,fg=white}
+\setbeamercolor{author}{fg=unil@black}
+\setbeamercolor{date}{fg=unil@black}
+\setbeamercolor{item}{fg=unil@black}
+\setbeamercolor{normal text}{fg=unil@black}
+\setbeamercolor{math text}{fg=unil@black}
+
+\setbeamertemplate{background canvas}
+{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node [xshift=0cm,yshift=0cm] at (current page.center)
+    {\includegraphics[width=\paperwidth,height=\paperheight]{figures/template_page}};
+  \end{tikzpicture}% 
+}
+
+\makeatletter
+\setbeamertemplate{footline}
+{
+  \begin{tikzpicture}[remember picture,overlay]
+    \node [xshift=0cm,yshift=0.55cm] at (current page.south west)
+    {\begin{beamercolorbox}[wd=1.937cm,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    {\insertframenumber{} / \inserttotalframenumber}\hspace*{2ex} 
+  \end{beamercolorbox}};
+  \end{tikzpicture}% 
+}
+\makeatother
+
+\mode
+<all>
