@@ -1,4 +1,4 @@
-% Dmitry Mikushin, Applied Parallel Computing LLC, dmitry@kernelgen.org
+% Dmitry Mikushin, UNIL, dmitry@kernelgen.org
 
 \documentclass[aspectratio=169,twoside]{beamer}
 
@@ -12,35 +12,8 @@
 \usepackage{relsize}
 \usetikzlibrary{calc,shapes.callouts,shapes.arrows}
 
-\makeatletter
-\newcommand{\changeoperator}[1]{%
-  \csletcs{#1@saved}{#1@}%
-  \csdef{#1@}{\changed@operator{#1}}%
-}
-\newcommand{\changed@operator}[1]{%
-  \mathop{%
-    \mathchoice{\textstyle\csuse{#1@saved}}
-               {\csuse{#1@saved}}
-               {\csuse{#1@saved}}
-               {\csuse{#1@saved}}%
-  }%
-}
-\makeatother
-
-\newcommand{\tsubame}[1]{
-\tikz[remember picture,baseline]{
-\node[xshift=1.7cm,yshift=-1cm,overlay,rectangle callout,callout relative pointer={(-0.3cm,0.7cm)},fill=white,draw=unil@blue,inner sep=4pt,outer sep=0, align=center, execute at begin node=\setlength{\baselineskip}{0.7em}] at (current page.center)
-{#1};
-}}%
-
-\newcommand{\pizdaint}[1]{
-\tikz[remember picture,baseline]{
-\node[xshift=5.1cm,yshift=-0.05cm,overlay,rectangle callout,callout relative pointer={(-0.3cm,0.7cm)},fill=white,draw=unil@blue,inner sep=4pt,outer sep=0, align=center, execute at begin node=\setlength{\baselineskip}{0.7em}] at (current page.center)
-{#1};
-}}%
-
-\title[Multi-iterator Engine]{Multi-iterator Engine}
-\author[Dmitry Mikushin et al.]{Dmitry Mikushin\quad Simon Scheidegger\quad Philipp Eisenhauer\quad Moritz}
+\title[HPC Multi-iterator Engine]{HPC Multi-iterator Engine\\ Design \& Implementation}
+\author[Dmitry Mikushin et al.]{Dmitry Mikushin\quad Simon Scheidegger\\ Philipp Eisenhauer\quad Moritz Mendel}
 \institute[UNIL]{}
 \date{May 4, 2021}
 
@@ -66,7 +39,17 @@
 
 \begin{frame}[fragile]{Multi-Iterator: the purpose}
 
-\includegraphics[width=7cm]{figures/IMG_0509}
+\begin{center}
+\includegraphics[width=11cm]{figures/combinations}
+\end{center}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Multi-Iterator: motivation}
+
+TODO Trend link video by Hal Finkel
 
 \end{frame}
 
@@ -105,8 +88,44 @@ printf("%d iterations visited\n", niters);
 \begin{itemize}
 \item \texttt{MultiIterator}: A group of indexes that iterate from 0 to the given upper value
 \item \texttt{LimitedMultiIterator}: A group of indexes that iterates only through indexes with total sum no greater than limit
-\item \texttt{GenericMultiIterator}: A group of indexes, whose indexes are themselves groups of indexes
+\item \texttt{GenericMultiIterator}: A hosting group of indexes, whose indexes are themselves groups of indexes
 \end{itemize}
+
+\vskip20pt
+
+$\Rightarrow$ A \texttt{GenericMultiIterator} of \texttt{MultiIterator} and \texttt{LimitedMultiIterator} elements can be used to express many kinds of combinatorial iterations
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Programming package structure}
+
+\begin{itemize}
+\item \texttt{multiit}: general-purpose multi-iterators in C++, with unit tests
+\item \texttt{kernit}: multi-iterator \emph{kernel} generator based on JIT-compilation located in the cloud (web service)
+\item \texttt{respyit} : subjected multi-iterators, with Python API, which quiries \texttt{kernit} to provide a kernel with required specifics
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Cloud serivce + end-user application pipeline}
+
+TODO Pipeline figure
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{End-user example}
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily, language=python]
+import respyit
+
+# TODO
+\end{lstlisting}
 
 \end{frame}
 
